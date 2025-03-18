@@ -1,0 +1,4 @@
+/* Importing the shared auth styles */
+@import '../SignIn/SignIn.css';
+
+/* Any additional styles specific to the signup page can be added here */
