@@ -43,8 +43,8 @@ const Header = () => {
   const getUserDisplayInfo = () => {
     if (currentUser && currentUser.name) {
       return {
-        initial: currentUser.name.charAt(0).toUpperCase(),
-        name: currentUser.name
+        initial: currentUser.firstname.charAt(0).toUpperCase(),
+        name: currentUser.firstname
       };
     }
     
@@ -52,10 +52,10 @@ const Header = () => {
       const userDataString = localStorage.getItem('user');
       if (userDataString) {
         const userData = JSON.parse(userDataString);
-        if (userData && userData.name) {
+        if (userData && userData.firstname) {
           return {
-            initial: userData.name.charAt(0).toUpperCase(),
-            name: userData.name
+            initial: userData.firstname.charAt(0).toUpperCase(),
+            name: userData.firstname
           };
         }
       }

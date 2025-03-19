@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Header from '../../components/Header/Header';
 import Sidebar from '../../components/Sidebar/Sidebar';
+import Questions from './Questions/Questions';
 import './Dashboard.css';
 
 // Dashboard Home Component
@@ -13,8 +14,7 @@ const DashboardHome = () => (
     <div className="dashboard-placeholder">
       <div className="placeholder-title">Your Dashboard Content</div>
       <div className="placeholder-text">
-        This is an empty dashboard ready for your content. You can customize this area with charts, 
-        tables, and other components based on your application's requirements.
+        This is an empty dashboard ready for your content.
       </div>
     </div>
     
@@ -25,18 +25,18 @@ const DashboardHome = () => (
       </div>
       
       <div className="stat-card">
-        <h3>Projects</h3>
+        <h3>Testimonials</h3>
         <div className="stat-value">0</div>
       </div>
       
       <div className="stat-card">
-        <h3>Tasks</h3>
+        <h3>Questions</h3>
         <div className="stat-value">0</div>
       </div>
       
       <div className="stat-card">
-        <h3>Completed</h3>
-        <div className="stat-value">0</div>
+        <h3>Completed/Requested</h3>
+        <div className="stat-value">0/0</div>
       </div>
     </div>
   </div>
@@ -66,10 +66,7 @@ const Dashboard = () => {
       <main className="dashboard-main">
         <Routes>
           <Route path="/" element={<DashboardHome />} />
-          <Route path="/analytics" element={<EmptyPage title="Analytics" />} />
-          <Route path="/projects" element={<EmptyPage title="Projects" />} />
-          <Route path="/calendar" element={<EmptyPage title="Calendar" />} />
-          <Route path="/messages" element={<EmptyPage title="Messages" />} />
+          <Route path="/questions" element={<Questions title="Questions" />} />
           <Route path="/settings" element={<EmptyPage title="Settings" />} />
           <Route path="*" element={<EmptyPage title="Page Not Found" />} />
         </Routes>

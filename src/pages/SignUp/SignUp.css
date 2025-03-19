@@ -1,4 +1,458 @@
 /* Importing the shared auth styles */
 @import '../SignIn/SignIn.css';
 
-/* Any additional styles specific to the signup page can be added here */
+.progress-container {
+    width: 100%;
+    margin: 1.5rem 0;
+  }
+  
+  .progress-bar {
+    height: 6px;
+    background-color: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background-color: #2563eb;
+    border-radius: 3px;
+    transition: width 0.5s ease-in-out;
+  }
+  
+  /* Step Indicator Styles */
+  .step-indicator {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1rem 0 2rem;
+    position: relative;
+  }
+  
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s ease;
+  }
+  
+  .step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #f1f5f9;
+    border: 2px solid #e2e8f0;
+    color: #94a3b8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .step.completed .step-number {
+    background-color: #2563eb;
+    border-color: #2563eb;
+    color: white;
+  }
+  
+  .step.active .step-number {
+    background-color: white;
+    border-color: #2563eb;
+    color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    transform: scale(1.1);
+  }
+  
+  .step-number::after {
+    content: '✓';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #2563eb;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: translateY(100%);
+    transition: transform 0.4s ease;
+  }
+  
+  .step.completed .step-number::after {
+    transform: translateY(0);
+  }
+  
+  .step-label {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-align: center;
+    max-width: 120px;
+  }
+  
+  .step.active .step-label {
+    color: #2563eb;
+    font-weight: 600;
+  }
+  
+  .step.completed .step-label {
+    color: #334155;
+  }
+  
+  .step-connector {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #e2e8f0;
+    z-index: 1;
+  }
+  
+  .step-connector-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: #2563eb;
+    transition: width 0.5s ease-in-out;
+  }
+  
+  /* Form Styles */
+  .step-form {
+    animation: fadeIn 0.5s ease;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .form-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  
+  .form-group {
+    margin-bottom: 1.25rem;
+    transition: all 0.3s ease;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #334155;
+    transition: color 0.3s ease;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .form-group input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+  
+  .form-group input.error {
+    border-color: #ef4444;
+  }
+  
+  .form-group input.error:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  }
+  
+  .error-message {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    animation: shakeError 0.4s ease;
+  }
+  
+  @keyframes shakeError {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+  
+  /* Form Actions Styles */
+  .form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+  }
+  
+  .next-button,
+  .back-button,
+  .submit-button {
+    padding: 0.875rem 1.75rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .next-button {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    margin-left: auto;
+  }
+  
+  .next-button:hover {
+    background-color: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+  }
+  
+  .back-button {
+    background-color: white;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .back-button:hover {
+    background-color: #f8fafc;
+    color: #334155;
+  }
+  
+  .submit-button {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .submit-button:hover {
+    background-color: #1d4ed8;
+  }
+  
+  .submit-button .button-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+  }
+  
+  .submit-button.loading .button-content {
+    transform: translateY(-100%);
+  }
+  
+  .loading-spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(100%);
+    transition: all 0.3s ease;
+  }
+  
+  .submit-button.loading .loading-spinner {
+    transform: translateY(0);
+  }
+  
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  /* Additional animations */
+  .step-enter {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  
+  .step-enter-active {
+    transform: translateX(0);
+    opacity: 1;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .step-exit {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  
+  .step-exit-active {
+    transform: translateX(-100%);
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  /* Auth card enhancements */
+  .auth-card {
+    padding: 2.5rem;
+    background-color: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    width: 100%;
+    max-width: 550px;
+    transition: all 0.3s ease;
+  }
+  
+  .auth-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .auth-header h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+  }
+  
+  .auth-header p {
+    color: #64748b;
+    font-size: 1.125rem;
+  }
+  
+  .auth-footer {
+    text-align: center;
+    margin-top: 2rem;
+    color: #64748b;
+  }
+  
+  .auth-footer a {
+    color: #2563eb;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  
+  .auth-footer a:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 640px) {
+    .step-indicator {
+      margin: 1rem 0 1.5rem;
+    }
+    
+    .step-number {
+      width: 32px;
+      height: 32px;
+      font-size: 0.875rem;
+    }
+    
+    .step-label {
+      font-size: 0.75rem;
+    }
+    
+    .form-actions {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .next-button,
+    .back-button {
+      width: 100%;
+      margin: 0;
+    }
+    
+    .auth-card {
+      padding: 1.5rem;
+    }
+  }
+
+  .google-signup-info {
+    background-color: #f8fafc;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  
+  .google-signup-info p {
+    margin-bottom: 0.75rem;
+    color: #64748b;
+  }
+  
+  .google-signup-info .google-email {
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+  }
+  
+  .google-signup-info .info-message {
+    font-size: 0.875rem;
+  }
+  
+  /* Import the divider and Google button styles */
+  .or-divider {
+    display: flex;
+    align-items: center;
+    margin: 1.5rem 0;
+    color: #64748b;
+    font-size: 0.875rem;
+  }
+  
+  .or-divider::before,
+  .or-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background-color: #e2e8f0;
+  }
+  
+  .or-divider::before {
+    margin-right: 1rem;
+  }
+  
+  .or-divider::after {
+    margin-left: 1rem;
+  }
+  
+  /* Style adjustments for disabled inputs */
+  .form-group input:disabled {
+    background-color: #f8fafc;
+    cursor: not-allowed;
+  }
+  

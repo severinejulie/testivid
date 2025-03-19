@@ -18,29 +18,24 @@ const Sidebar = () => {
       path: '/dashboard',
     },
     {
-      title: 'Analytics',
-      icon: '📈',
-      path: '/dashboard/analytics',
+      title: 'Questions',
+      icon: '❔',
+      path: '/dashboard/questions',
     },
     {
-      title: 'Projects',
-      icon: '📁',
-      path: '/dashboard/projects',
+      title: 'Testimonials',
+      icon: '🎬',
+      path: '/testimonials',
     },
     {
-      title: 'Calendar',
-      icon: '📅',
-      path: '/dashboard/calendar',
-    },
-    {
-      title: 'Messages',
-      icon: '💬',
-      path: '/dashboard/messages',
+      title: 'Requests',
+      icon: '📥', 
+      path: '/requests',
     },
     {
       title: 'Settings',
       icon: '⚙️',
-      path: '/dashboard/settings',
+      path: '/settings',
     },
   ];
 

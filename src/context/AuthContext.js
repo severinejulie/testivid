@@ -65,10 +65,17 @@ export const AuthProvider = ({ children }) => {
   const signUp = async (userData) => {
     setError(null);
     try {
-      const response = await api.post('/api/auth/signup', userData);
-      return response.data;
+      // For Google sign-ups, check if we have the fromGoogle flag
+      if (userData.fromGoogle) {
+        const response = await api.post('/api/auth/signup', userData);
+        return response.data;
+      } else {
+        // Regular email/password signup
+        const response = await api.post('/api/auth/signup', userData);
+        return response.data;
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'Error during signup');
+      setError(err.response?.data?.error || 'Error during signup');
       throw err;
     }
   };
@@ -76,30 +83,60 @@ export const AuthProvider = ({ children }) => {
   const signIn = async (credentials) => {
     setError(null);
     try {
-      const response = await api.post('/api/auth/signin', credentials);
-      
-      console.log('Sign-in response:', response.data);
-      
-      // Make sure we have valid data before storing
-      if (response.data && response.data.token) {
-        // Store token
-        localStorage.setItem('token', response.data.token);
+      // Check if this is a Google sign-in
+      if (credentials.provider === 'google') {
+        const response = await api.post('/api/auth/signin-google', {
+          provider: 'google'
+        });
         
-        // Only store user data if it exists
-        if (response.data.user) {
-          localStorage.setItem('user', JSON.stringify(response.data.user));
-          setCurrentUser(response.data.user);
-        } else {
-          console.warn('Sign-in response missing user data', response.data);
+        // Redirect to Google OAuth URL
+        if (response.data && response.data.url) {
+          window.location.href = response.data.url;
         }
         
-        setIsAuthenticated(true);
+        // This won't execute since we're redirecting, but included for completeness
+        return response.data;
+      } else {
+        // Regular email/password signin
+        const response = await api.post('/api/auth/signin', credentials);
+        
+        // Store token and user data
+        if (response.data && response.data.token) {
+          localStorage.setItem('token', response.data.token);
+          
+          // Only store user data if it exists
+          if (response.data.user) {
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+            setCurrentUser(response.data.user);
+          }
+          
+          setIsAuthenticated(true);
+        }
+        
+        return response.data;
       }
-      
-      return response.data;
     } catch (err) {
-      console.error('Sign-in error:', err);
-      setError(err.response?.data?.message || 'Authentication failed');
+      setError(err.response?.data?.error || 'Authentication failed');
+      throw err;
+    }
+  };
+
+  const handleGoogleCallback = async () => {
+    try {
+      // This function would be called after redirecting back from Google OAuth
+      // You would typically check with your backend to get user details
+      const response = await api.get('/api/auth/me');
+      
+      if (response.data && response.data.user) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        setCurrentUser(response.data.user);
+        setIsAuthenticated(true);
+        return response.data.user;
+      }
+    } catch (err) {
+      console.error('Error handling Google callback:', err);
+      setError('Failed to complete Google authentication');
       throw err;
     }
   };
@@ -115,6 +152,31 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem('user');
       setCurrentUser(null);
       setIsAuthenticated(false);
+    }
+  };
+
+  const forgotPassword = async (email) => {
+    setError(null);
+    try {
+      const response = await api.post('/api/auth/forgot-password', { email });
+      return response.data; // Message from backend
+    } catch (err) {
+      console.error('Forgot Password Error:', err);
+      setError(err.response?.data?.error || "Error sending password reset email.");
+      throw err;
+    }
+  };
+
+  // 🔹 Reset Password (Update Password)
+  const resetPassword = async (access_token, new_password) => {
+    setError(null);
+    try {
+      const response = await api.post('/api/auth/reset-password', { access_token, new_password });
+      return response.data; // Message from backend
+    } catch (err) {
+      console.error('Reset Password Error:', err);
+      setError(err.response?.data?.error || "Error resetting password.");
+      throw err;
     }
   };
 
@@ -134,7 +196,11 @@ export const AuthProvider = ({ children }) => {
     signUp,
     signIn,
     signOut,
-    updateUserData // Add this new function to the context
+    setError,
+    updateUserData,
+    forgotPassword,
+    resetPassword, 
+    handleGoogleCallback
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
