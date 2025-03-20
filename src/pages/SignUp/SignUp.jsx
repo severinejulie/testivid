@@ -7,7 +7,7 @@ import './SignUp.css';
 const SignUp = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signUp, error, setError } = useAuth();
+  const { signUp, error, setError, setIsInGoogleSignupFlow } = useAuth();
   
   // Get Google step from location state
   const initialStep = location.state?.googleStep || 1;
@@ -190,6 +190,8 @@ const SignUp = () => {
       
       // If signing up with Google, indicate this in the request
       if (fromGoogle) {
+        localStorage.removeItem('googleSignupInProgress');
+        
         signupData.fromGoogle = true;
         const googleUser = JSON.parse(localStorage.getItem('googleUserData'));
         // Add any other Google data needed
@@ -218,11 +220,11 @@ const SignUp = () => {
             localStorage.setItem('user', JSON.stringify(response.user));
           }
         }
-
+        setIsInGoogleSignupFlow(false);
         setTimeout(() => {
           navigate('/dashboard');
         }, 100);
-        
+
       } else {
         // For regular email/password sign-ups, redirect to sign-in page
         await signUp(signupData);

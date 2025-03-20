@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Pages
@@ -13,9 +13,18 @@ import AuthCallback from './pages/AuthCallback/AuthCallback';
 
 import './App.css';
 
-// Protected route component
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isInGoogleSignupFlow } = useAuth();
+  const location = useLocation();
+  console.log("here 1")
+  console.log(isInGoogleSignupFlow)
+  // Redirect to signup if Google flow is incomplete
+  if (isAuthenticated && isInGoogleSignupFlow && 
+      location.pathname === '/dashboard') {
+    return <Navigate to="/signup" state={{ fromGoogle: true, googleStep: 2 }} />;
+  }
+  
+  // Normal protection logic
   if (!isAuthenticated) {
     return <Navigate to="/signin" />;
   }
@@ -23,36 +32,65 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+const SessionInitializer = () => {
+  const { 
+    setCurrentUser, 
+    setIsAuthenticated, 
+    setIsInGoogleSignupFlow
+  } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  useEffect(() => {
+    const checkSession = async () => {
+      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('user');
+      
+      if (token && userData) {
+        try {
+          // Check if we're in the middle of Google signup
+          const inGoogleSignup = localStorage.getItem('googleSignupInProgress') === 'true';
+          
+          // Set auth state from localStorage first
+          setIsAuthenticated(true);
+          setCurrentUser(JSON.parse(userData));
+          
+          // Important: Set this state based on localStorage
+          if (inGoogleSignup) {
+            setIsInGoogleSignupFlow(true);
+            
+            // Redirect only if not already on signup page
+            if (location.pathname !== '/signup') {
+              navigate('/signup', { 
+                state: { 
+                  fromGoogle: true, 
+                  googleStep: 2 
+                },
+                replace: true // Use replace to avoid building up history
+              });
+            }
+          }
+        } catch (error) {
+          // Token invalid, clean up
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          localStorage.removeItem('googleSignupInProgress');
+          localStorage.removeItem('googleUserData');
+          localStorage.removeItem('googleAccessToken');
+          setIsAuthenticated(false);
+          setCurrentUser(null);
+          setIsInGoogleSignupFlow(false);
+        }
+      }
+    };
+    
+    checkSession();
+  }, [setCurrentUser, setIsAuthenticated, setIsInGoogleSignupFlow, navigate, location.pathname]);
+  
+  return null;
+};
 
 function App() {
-  const SessionInitializer = () => {
-    const { setCurrentUser, setIsAuthenticated } = useAuth();
-    
-    useEffect(() => {
-      const checkSession = async () => {
-        const token = localStorage.getItem('token');
-        const userData = localStorage.getItem('user');
-        
-        if (token && userData) {
-          try {
-            // Set auth state from localStorage
-            setIsAuthenticated(true);
-            setCurrentUser(JSON.parse(userData));
-          } catch (error) {
-            // Token invalid, clean up
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            setIsAuthenticated(false);
-            setCurrentUser(null);
-          }
-        }
-      };
-      
-      checkSession();
-    }, [setCurrentUser, setIsAuthenticated]);
-    
-    return null;
-  };
   return (
     <AuthProvider>
       <Router>

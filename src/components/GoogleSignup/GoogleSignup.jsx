@@ -5,18 +5,14 @@ import './GoogleSignup.css';
 const GoogleSignup = ({ onGoogleDataReceived }) => {
   const handleGoogleSignup = async () => {
     try {
-      // Make a request to your backend to get the Google OAuth URL
+      localStorage.setItem('googleAuthAction', 'signup');
+      
       const response = await api.post('/api/auth/signin-google', {
         provider: 'google'
       });
       
-      // Get the URL from the response
       const { url } = response.data;
       
-      // Store a callback flag in localStorage to identify this as a signup (not signin)
-      localStorage.setItem('googleAuthAction', 'signup');
-      
-      // Redirect to Google OAuth URL
       window.location.href = url;
     } catch (err) {
       console.error('Error initiating Google signup:', err);

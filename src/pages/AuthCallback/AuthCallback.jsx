@@ -8,21 +8,28 @@ const AuthCallback = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { setCurrentUser, setIsAuthenticated } = useAuth();
+  const { setCurrentUser, setIsAuthenticated, setIsInGoogleSignupFlow, isInGoogleSignupFlow } = useAuth();
 
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
         setLoading(true);
         
-        // Extract any auth parameters from URL
+        // CRITICAL: Check if this was a signup immediately and set flag
+        const authAction = localStorage.getItem('googleAuthAction');
+        if (authAction === 'signup') {
+          localStorage.setItem('googleSignupInProgress', 'true');
+        }
+        
+        // Extract auth parameters from URL
         const hashParams = window.location.hash.substring(1)
           .split('&')
           .reduce((params, pair) => {
+            if (!pair) return params;
             const [key, value] = pair.split('=');
-            return { ...params, [key]: decodeURIComponent(value) };
+            return { ...params, [key]: decodeURIComponent(value || '') };
           }, {});
-
+    
         const accessToken = hashParams.access_token;
       
         if (!accessToken) {
@@ -30,21 +37,27 @@ const AuthCallback = () => {
           setError('Authentication failed: No access token received');
           return;
         }
-        localStorage.setItem('googleAccessToken', accessToken);
-        // Check if this is a signup or signin
-        const authAction = localStorage.getItem('googleAuthAction');
-        localStorage.removeItem('googleAuthAction'); // Clean up
         
-        // Call your backend to validate and process the authentication
+        localStorage.setItem('googleAccessToken', accessToken);
+        
+        // Process the authentication with backend
         const response = await api.post('/api/auth/process-auth-callback', {
-          hashParams,
-          authAction,
-          accessToken
+          accessToken,
+          authAction
         });
         
-        if (response.data.user) {
+        if (response.data.user && response.data.token) {
+          // Store token and user info
+          localStorage.setItem('token', response.data.token);
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+          
+          // Set auth state
+          setCurrentUser(response.data.user);
+          setIsAuthenticated(true);
+          
+          // Handle navigation based on auth action
           if (authAction === 'signup') {
-            // Store user data for the signup flow
+            // Store user data for signup flow
             const googleUserData = {
               email: response.data.user.email,
               firstname: response.data.user.firstname || '',
@@ -53,6 +66,9 @@ const AuthCallback = () => {
             };
             
             localStorage.setItem('googleUserData', JSON.stringify(googleUserData));
+            setIsInGoogleSignupFlow(true);
+            
+            // Navigate after a small delay
             setTimeout(() => {
               navigate('/signup', { 
                 state: { 
@@ -62,18 +78,12 @@ const AuthCallback = () => {
               });
             }, 100);
           } else {
-            // For sign in, set token and redirect to dashboard
-            if (response.data.token) {
-              localStorage.setItem('token', response.data.token);
-              localStorage.setItem('user', JSON.stringify(response.data.user));
-            }
-
-            setCurrentUser(response.data.user);
-            setIsAuthenticated(true);
+            // Normal sign in - go to dashboard
+            localStorage.removeItem('googleAuthAction');
             
             setTimeout(() => {
               navigate('/dashboard');
-            }, 1000);
+            }, 100);
           }
         } else {
           throw new Error('Authentication failed');

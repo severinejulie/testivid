@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isInGoogleSignupFlow, setIsInGoogleSignupFlow] = useState(false);
 
   // Function to safely parse user data from localStorage
   const loadUserFromStorage = () => {
@@ -26,21 +27,22 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    // Check if user is logged in on page load/refresh
     const token = localStorage.getItem('token');
     if (token) {
+      const inGoogleSignup = localStorage.getItem('googleSignupInProgress') === 'true';
+      
+      if (inGoogleSignup) {
+        setIsInGoogleSignupFlow(true); 
+      }
+      
       setIsAuthenticated(true);
       
-      // Load user data from storage
       const userData = loadUserFromStorage();
       if (userData) {
         setCurrentUser(userData);
       } else {
-        // If we have a token but no user data, try to fetch user data from server
         const fetchUserData = async () => {
           try {
-            // This endpoint should return the current user data
-            // You may need to implement this on your backend
             const response = await api.get('/api/auth/me');
             if (response.data && response.data.user) {
               setCurrentUser(response.data.user);
@@ -51,7 +53,9 @@ export const AuthProvider = ({ children }) => {
             // If we can't get user data, we should probably log out
             if (err.response && err.response.status === 401) {
               localStorage.removeItem('token');
+              localStorage.removeItem('googleSignupInProgress'); // Also clear this flag
               setIsAuthenticated(false);
+              setIsInGoogleSignupFlow(false); // Reset this state too
             }
           }
         };
@@ -217,7 +221,9 @@ export const AuthProvider = ({ children }) => {
     resetPassword, 
     handleGoogleCallback,
     setCurrentUser,
-    setIsAuthenticated
+    setIsAuthenticated,
+    isInGoogleSignupFlow,
+    setIsInGoogleSignupFlow
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
