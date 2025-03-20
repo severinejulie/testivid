@@ -36,6 +36,7 @@ const SignUp = () => {
     if (fromGoogle) {
       try {
         const googleData = JSON.parse(localStorage.getItem('googleUserData'));
+        console.log(googleData);
         if (googleData) {
           setFormData(prevData => ({
             ...prevData,
@@ -196,12 +197,37 @@ const SignUp = () => {
           signupData.googleId = googleUser.sub;
           signupData.picture = googleUser.picture;
         }
-        // Clean up stored data
-        localStorage.removeItem('googleUserData');
+        
+        // Get token if available
+        const accessToken = localStorage.getItem('googleAccessToken');
+        if (accessToken) {
+          signupData.accessToken = accessToken;
+        }
+        
+        // Clean up stored datalocalStorage.removeItem('googleUserData');
+        localStorage.removeItem('googleAccessToken');
+        
+        
+        // For Google sign-ups, complete the process and redirect to dashboard
+        const response = await signUp(signupData);
+        
+        // If we got a token back, store it
+        if (response.token) {
+          localStorage.setItem('token', response.token);
+          if (response.user) {
+            localStorage.setItem('user', JSON.stringify(response.user));
+          }
+        }
+
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 100);
+        
+      } else {
+        // For regular email/password sign-ups, redirect to sign-in page
+        await signUp(signupData);
+        navigate('/signin', { state: { message: 'Account created successfully! Please verify your email.' } });
       }
-      
-      await signUp(signupData);
-      navigate('/signin', { state: { message: 'Account created successfully! Please verify your email.' } });
     } catch (err) {
       console.error('Signup error:', err);
       // Error is handled by the AuthContext and can be displayed

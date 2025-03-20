@@ -7,12 +7,13 @@ const GoogleSignIn = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      // Store a callback flag in localStorage to identify this as a signin (not signup)
-      localStorage.setItem('googleAuthAction', 'signin');
+      localStorage.removeItem('googleAuthAction');
+      localStorage.removeItem('googleAccessToken');
+      localStorage.removeItem('googleUserData');
       
-      // Use the signIn method with provider parameter
+      localStorage.setItem('googleAuthAction', 'signin-' + Date.now());
+      
       await signIn({ provider: 'google' });
-      // Note: The page will redirect to Google's OAuth page
     } catch (err) {
       console.error('Error initiating Google sign in:', err);
     }

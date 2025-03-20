@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
@@ -16,7 +16,6 @@ import './App.css';
 // Protected route component
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
-  
   if (!isAuthenticated) {
     return <Navigate to="/signin" />;
   }
@@ -24,10 +23,40 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+
 function App() {
+  const SessionInitializer = () => {
+    const { setCurrentUser, setIsAuthenticated } = useAuth();
+    
+    useEffect(() => {
+      const checkSession = async () => {
+        const token = localStorage.getItem('token');
+        const userData = localStorage.getItem('user');
+        
+        if (token && userData) {
+          try {
+            // Set auth state from localStorage
+            setIsAuthenticated(true);
+            setCurrentUser(JSON.parse(userData));
+          } catch (error) {
+            // Token invalid, clean up
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setIsAuthenticated(false);
+            setCurrentUser(null);
+          }
+        }
+      };
+      
+      checkSession();
+    }, [setCurrentUser, setIsAuthenticated]);
+    
+    return null;
+  };
   return (
     <AuthProvider>
       <Router>
+        <SessionInitializer />
         <div className="App">
           <Routes>
             <Route path="/" element={<Landing />} />

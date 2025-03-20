@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import './AuthCallback.css';
 
@@ -7,6 +8,7 @@ const AuthCallback = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { setCurrentUser, setIsAuthenticated } = useAuth();
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -20,7 +22,15 @@ const AuthCallback = () => {
             const [key, value] = pair.split('=');
             return { ...params, [key]: decodeURIComponent(value) };
           }, {});
-        
+
+        const accessToken = hashParams.access_token;
+      
+        if (!accessToken) {
+          console.error('No access token found in URL');
+          setError('Authentication failed: No access token received');
+          return;
+        }
+        localStorage.setItem('googleAccessToken', accessToken);
         // Check if this is a signup or signin
         const authAction = localStorage.getItem('googleAuthAction');
         localStorage.removeItem('googleAuthAction'); // Clean up
@@ -28,7 +38,8 @@ const AuthCallback = () => {
         // Call your backend to validate and process the authentication
         const response = await api.post('/api/auth/process-auth-callback', {
           hashParams,
-          authAction
+          authAction,
+          accessToken
         });
         
         if (response.data.user) {
@@ -42,21 +53,27 @@ const AuthCallback = () => {
             };
             
             localStorage.setItem('googleUserData', JSON.stringify(googleUserData));
-            
-            // Redirect to signup to continue with company info
-            navigate('/signup', { 
-              state: { 
-                fromGoogle: true,
-                googleStep: 2 // Start at step 2 (company details)
-              }
-            });
+            setTimeout(() => {
+              navigate('/signup', { 
+                state: { 
+                  fromGoogle: true,
+                  googleStep: 2
+                }
+              });
+            }, 100);
           } else {
             // For sign in, set token and redirect to dashboard
             if (response.data.token) {
               localStorage.setItem('token', response.data.token);
               localStorage.setItem('user', JSON.stringify(response.data.user));
             }
-            navigate('/dashboard');
+
+            setCurrentUser(response.data.user);
+            setIsAuthenticated(true);
+            
+            setTimeout(() => {
+              navigate('/dashboard');
+            }, 1000);
           }
         } else {
           throw new Error('Authentication failed');

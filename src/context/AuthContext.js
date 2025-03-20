@@ -67,7 +67,17 @@ export const AuthProvider = ({ children }) => {
     try {
       // For Google sign-ups, check if we have the fromGoogle flag
       if (userData.fromGoogle) {
-        const response = await api.post('/api/auth/signup', userData);
+        const accessToken = userData.accessToken;
+
+        if (!accessToken) {
+          throw new Error('No access token available for Google signup');
+        }
+
+        const response = await api.post('/api/auth/signup', {
+          ...userData,
+          accessToken
+        });
+        setIsAuthenticated(true);
         return response.data;
       } else {
         // Regular email/password signup
@@ -144,12 +154,17 @@ export const AuthProvider = ({ children }) => {
   const signOut = async () => {
     try {
       await api.post('/api/auth/signout');
+      
+      // const googleLogoutUrl = 'https://accounts.google.com/logout';
+      // // Either open in a new tab or redirect temporarily
+      // window.open(googleLogoutUrl, '_blank');
+      
     } catch (err) {
       console.error('Error during sign out:', err);
     } finally {
-      // Clear local storage and state
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      localStorage.removeItem('googleAccessToken');
       setCurrentUser(null);
       setIsAuthenticated(false);
     }
@@ -200,7 +215,9 @@ export const AuthProvider = ({ children }) => {
     updateUserData,
     forgotPassword,
     resetPassword, 
-    handleGoogleCallback
+    handleGoogleCallback,
+    setCurrentUser,
+    setIsAuthenticated
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
