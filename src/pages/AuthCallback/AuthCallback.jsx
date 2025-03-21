@@ -1,3 +1,4 @@
+// In your AuthCallback.jsx component:
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -8,17 +9,22 @@ const AuthCallback = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { setCurrentUser, setIsAuthenticated, setIsInGoogleSignupFlow, isInGoogleSignupFlow } = useAuth();
+  const { setCurrentUser, setIsAuthenticated, setIsInGoogleSignupFlow } = useAuth();
 
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
         setLoading(true);
         
-        // CRITICAL: Check if this was a signup immediately and set flag
+        // Get auth action and check explicitly for signin or signup
         const authAction = localStorage.getItem('googleAuthAction');
+        
+        // Set googleSignupInProgress ONLY for signup, not for signin
         if (authAction === 'signup') {
           localStorage.setItem('googleSignupInProgress', 'true');
+        } else {
+          // Make sure the flag is removed for sign in
+          localStorage.removeItem('googleSignupInProgress');
         }
         
         // Extract auth parameters from URL
@@ -78,7 +84,9 @@ const AuthCallback = () => {
               });
             }, 100);
           } else {
-            // Normal sign in - go to dashboard
+            // For signin: explicitly set this to false just to be sure
+            setIsInGoogleSignupFlow(false);
+            localStorage.removeItem('googleSignupInProgress');
             localStorage.removeItem('googleAuthAction');
             
             setTimeout(() => {
@@ -97,9 +105,9 @@ const AuthCallback = () => {
     };
 
     handleAuthCallback();
-  }, [navigate]);
+  }, [navigate, setCurrentUser, setIsAuthenticated, setIsInGoogleSignupFlow]);
 
-  // Rest of your component remains the same
+  // Rest of your component 
   if (loading) {
     return (
       <div className="auth-callback-container">

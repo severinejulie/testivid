@@ -158,19 +158,17 @@ export const AuthProvider = ({ children }) => {
   const signOut = async () => {
     try {
       await api.post('/api/auth/signout');
-      
-      // const googleLogoutUrl = 'https://accounts.google.com/logout';
-      // // Either open in a new tab or redirect temporarily
-      // window.open(googleLogoutUrl, '_blank');
-      
     } catch (err) {
       console.error('Error during sign out:', err);
     } finally {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       localStorage.removeItem('googleAccessToken');
+      localStorage.removeItem('googleSignupInProgress');
+      localStorage.removeItem('googleUserData'); 
       setCurrentUser(null);
       setIsAuthenticated(false);
+      setIsInGoogleSignupFlow(false);
     }
   };
 

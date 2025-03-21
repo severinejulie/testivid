@@ -16,14 +16,16 @@ import './App.css';
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isInGoogleSignupFlow } = useAuth();
   const location = useLocation();
-  console.log("here 1")
-  console.log(isInGoogleSignupFlow)
   // Redirect to signup if Google flow is incomplete
   if (isAuthenticated && isInGoogleSignupFlow && 
       location.pathname === '/dashboard') {
     return <Navigate to="/signup" state={{ fromGoogle: true, googleStep: 2 }} />;
   }
-  
+  console.log("isAuthenticated")
+  console.log(isAuthenticated)
+
+  console.log("isInGoogleSignupFlow")
+  console.log(isInGoogleSignupFlow)
   // Normal protection logic
   if (!isAuthenticated) {
     return <Navigate to="/signin" />;
@@ -69,14 +71,18 @@ const SessionInitializer = () => {
                 replace: true // Use replace to avoid building up history
               });
             }
+          } else {
+            // Explicitly set this to false for normal sign-ins
+            setIsInGoogleSignupFlow(false);
           }
         } catch (error) {
-          // Token invalid, clean up
+          // Token invalid, clean up ALL auth state
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           localStorage.removeItem('googleSignupInProgress');
           localStorage.removeItem('googleUserData');
           localStorage.removeItem('googleAccessToken');
+          localStorage.removeItem('googleAuthAction');
           setIsAuthenticated(false);
           setCurrentUser(null);
           setIsInGoogleSignupFlow(false);

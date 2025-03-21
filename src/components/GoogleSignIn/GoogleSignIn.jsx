@@ -1,3 +1,4 @@
+// In your GoogleSignIn.jsx component:
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import './GoogleSignIn.css';
@@ -7,11 +8,14 @@ const GoogleSignIn = () => {
 
   const handleGoogleSignIn = async () => {
     try {
+      // Clear any previous Google auth state
       localStorage.removeItem('googleAuthAction');
       localStorage.removeItem('googleAccessToken');
       localStorage.removeItem('googleUserData');
+      localStorage.removeItem('googleSignupInProgress'); // Add this line to ensure it's cleared
       
-      localStorage.setItem('googleAuthAction', 'signin-' + Date.now());
+      // Set action as simply 'signin' without timestamp
+      localStorage.setItem('googleAuthAction', 'signin');
       
       await signIn({ provider: 'google' });
     } catch (err) {
