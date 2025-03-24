@@ -1,4 +1,3 @@
-// In your AuthCallback.jsx component:
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -16,16 +15,8 @@ const AuthCallback = () => {
       try {
         setLoading(true);
         
-        // Get auth action and check explicitly for signin or signup
+        // Get auth action
         const authAction = localStorage.getItem('googleAuthAction');
-        
-        // Set googleSignupInProgress ONLY for signup, not for signin
-        if (authAction === 'signup') {
-          localStorage.setItem('googleSignupInProgress', 'true');
-        } else {
-          // Make sure the flag is removed for sign in
-          localStorage.removeItem('googleSignupInProgress');
-        }
         
         // Extract auth parameters from URL
         const hashParams = window.location.hash.substring(1)
@@ -53,6 +44,9 @@ const AuthCallback = () => {
         });
         
         if (response.data.user && response.data.token) {
+          // Check if this is a new user or existing user
+          const isNewUser = response.data.isNewUser;
+          
           // Store token and user info
           localStorage.setItem('token', response.data.token);
           localStorage.setItem('user', JSON.stringify(response.data.user));
@@ -60,9 +54,11 @@ const AuthCallback = () => {
           // Set auth state
           setCurrentUser(response.data.user);
           setIsAuthenticated(true);
-          
-          // Handle navigation based on auth action
-          if (authAction === 'signup') {
+          // Handle as a signup if it's a new user, regardless of the original authAction
+          if (isNewUser) {
+            // Store the flag for Google signup flow
+            localStorage.setItem('googleSignupInProgress', 'true');
+            
             // Store user data for signup flow
             const googleUserData = {
               email: response.data.user.email,
@@ -74,7 +70,7 @@ const AuthCallback = () => {
             localStorage.setItem('googleUserData', JSON.stringify(googleUserData));
             setIsInGoogleSignupFlow(true);
             
-            // Navigate after a small delay
+            // Navigate to signup with the "fromGoogle" state
             setTimeout(() => {
               navigate('/signup', { 
                 state: { 
@@ -84,10 +80,10 @@ const AuthCallback = () => {
               });
             }, 100);
           } else {
-            // For signin: explicitly set this to false just to be sure
-            setIsInGoogleSignupFlow(false);
+            // Existing user doing normal sign in
             localStorage.removeItem('googleSignupInProgress');
             localStorage.removeItem('googleAuthAction');
+            setIsInGoogleSignupFlow(false);
             
             setTimeout(() => {
               navigate('/dashboard');
@@ -107,7 +103,7 @@ const AuthCallback = () => {
     handleAuthCallback();
   }, [navigate, setCurrentUser, setIsAuthenticated, setIsInGoogleSignupFlow]);
 
-  // Rest of your component 
+  // Rest of component remains the same
   if (loading) {
     return (
       <div className="auth-callback-container">
