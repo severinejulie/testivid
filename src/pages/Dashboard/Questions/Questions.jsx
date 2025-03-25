@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../../services/api';
 import './Questions.css';
+import { useAuth } from '../../../context/AuthContext';
 
 const Questions = () => {
   const [questions, setQuestions] = useState([]);
@@ -8,34 +9,25 @@ const Questions = () => {
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { currentUser} = useAuth();
+  const [showModal, setShowModal] = useState(false);
+  const [questionToDelete, setQuestionToDelete] = useState(null);
 
-  // Fetch questions from the backend
+
   const fetchQuestions = async () => {
     setLoading(true);
     try {
-      // This endpoint would need to be implemented on your backend
-      const response = await api.get('/api/questions');
+      const response = await api.get(`/api/questions/list?company_id=${currentUser.company_id}`);
       setQuestions(response.data);
       setError(null);
     } catch (err) {
       console.error('Error fetching questions:', err);
       setError('Failed to load questions. Please try again later.');
-      
-      // For demo purposes, if the API endpoint doesn't exist yet
-      // Uncomment to use sample data
-      
-      setQuestions([
-        { id: 1, text: 'What problem did our product help you solve?' },
-        { id: 2, text: 'How has our service improved your business?' },
-        { id: 3, text: 'What specific feature do you find most valuable?' },
-        { id: 4, text: 'Would you recommend our product to others? Why?' }
-      ]);
-      setError(null);
-      
     } finally {
       setLoading(false);
     }
   };
+  
 
   // Load questions on component mount
   useEffect(() => {
@@ -51,8 +43,10 @@ const Questions = () => {
     try {
       if (editingQuestion) {
         // Update existing question
-        await api.put(`/api/questions/${editingQuestion.id}`, { 
-          text: newQuestion 
+        await api.post(`/api/questions/edit`, { 
+          id: editingQuestion.id,
+          company_id: currentUser.company_id,
+          text: newQuestion
         });
         
         setQuestions(questions.map(q => 
@@ -61,7 +55,8 @@ const Questions = () => {
         setEditingQuestion(null);
       } else {
         // Add new question
-        const response = await api.post('/api/questions', { 
+        const response = await api.post('/api/questions/add', { 
+          company_id: currentUser.company_id,
           text: newQuestion 
         });
         
@@ -88,20 +83,35 @@ const Questions = () => {
     setNewQuestion('');
   };
 
-  // Delete a question
-  const handleDelete = async (questionId) => {
-    if (!window.confirm('Are you sure you want to delete this question?')) {
-      return;
-    }
-    
+  const confirmDelete = (questionId) => {
+    setQuestionToDelete(questionId);
+    setShowModal(true);
+  };
+  
+  const handleDeleteConfirmed = async () => {
+    if (!questionToDelete) return;
+  
     try {
-      await api.delete(`/api/questions/${questionId}`);
-      setQuestions(questions.filter(q => q.id !== questionId));
+      await api.post(`/api/questions/delete`, {
+        id: questionToDelete,
+        company_id: currentUser.company_id
+      });
+      setQuestions(questions.filter(q => q.id !== questionToDelete));
+      setError(null);
     } catch (err) {
       console.error('Error deleting question:', err);
       setError('Failed to delete question. Please try again.');
+    } finally {
+      setShowModal(false);
+      setQuestionToDelete(null);
     }
   };
+  
+  const cancelDelete = () => {
+    setShowModal(false);
+    setQuestionToDelete(null);
+  };
+  
 
   return (
     <div className="dashboard-content questions-page">
@@ -158,7 +168,7 @@ const Questions = () => {
             <div className="loading">Loading questions...</div>
           ) : questions.length === 0 ? (
             <div className="no-questions">
-              <p>No questions added yet. Create your first question above!</p>
+              <p>No questions added yet. Create your first question</p>
             </div>
           ) : (
             <div className="questions-table-container">
@@ -183,7 +193,7 @@ const Questions = () => {
                         </button>
                         <button 
                           className="delete-button" 
-                          onClick={() => handleDelete(question.id)}
+                          onClick={() => confirmDelete(question.id)}
                           aria-label="Delete question"
                         >
                           🗑️
@@ -197,6 +207,19 @@ const Questions = () => {
           )}
         </section>
       </div>
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Confirm Deletion</h3>
+            <p>Are you sure you want to delete this question?</p>
+            <div className="modal-actions">
+              <button onClick={handleDeleteConfirmed} className="confirm-button">Yes, delete</button>
+              <button onClick={cancelDelete} className="cancel-button">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

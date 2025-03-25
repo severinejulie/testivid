@@ -21,11 +21,6 @@ const ProtectedRoute = ({ children }) => {
       location.pathname === '/dashboard') {
     return <Navigate to="/signup" state={{ fromGoogle: true, googleStep: 2 }} />;
   }
-  console.log("isAuthenticated")
-  console.log(isAuthenticated)
-
-  console.log("isInGoogleSignupFlow")
-  console.log(isInGoogleSignupFlow)
   // Normal protection logic
   if (!isAuthenticated) {
     return <Navigate to="/signin" />;
