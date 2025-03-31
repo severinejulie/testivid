@@ -17,7 +17,7 @@ const Questions = () => {
   const fetchQuestions = async () => {
     setLoading(true);
     try {
-      const response = await api.get(`/api/questions/list?company_id=${currentUser.company_id}`);
+      const response = await api.get(`/api/questions/list?company_id=${currentUser.company_id}&_=${Date.now()}`);
       setQuestions(response.data);
       setError(null);
     } catch (err) {

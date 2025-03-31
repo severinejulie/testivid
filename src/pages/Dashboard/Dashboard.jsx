@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import Header from '../../components/Header/Header';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import Questions from './Questions/Questions';
+import Requests from './Requests/Requests';
 import './Dashboard.css';
 
 // Dashboard Home Component
@@ -67,6 +68,7 @@ const Dashboard = () => {
         <Routes>
           <Route path="/" element={<DashboardHome />} />
           <Route path="/questions" element={<Questions title="Questions" />} />
+          <Route path="/requests" element={<Requests title="Requests" />} />
           <Route path="/settings" element={<EmptyPage title="Settings" />} />
           <Route path="*" element={<EmptyPage title="Page Not Found" />} />
         </Routes>

@@ -30,7 +30,7 @@ const Sidebar = () => {
     {
       title: 'Requests',
       icon: '📥', 
-      path: '/requests',
+      path: '/dashboard/requests',
     },
     {
       title: 'Settings',
