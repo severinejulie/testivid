@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard/Dashboard';
 import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
 import ResetPassword from './pages/ResetPassword/ResetPassword';
 import AuthCallback from './pages/AuthCallback/AuthCallback';
+import TestimonialSubmit from './pages/TestimonialSubmit/TestimonialSubmit';
 
 import './App.css';
 
@@ -103,6 +104,7 @@ function App() {
             <Route path="/signin" element={<SignIn />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/testimonial/submit/:token" element={<TestimonialSubmit />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route 
               path="/dashboard/*" 

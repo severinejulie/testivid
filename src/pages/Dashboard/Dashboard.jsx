@@ -4,6 +4,8 @@ import Header from '../../components/Header/Header';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import Questions from './Questions/Questions';
 import Requests from './Requests/Requests';
+import Testimonials from './Testimonials/Testimonials';
+import TestimonialDetail from './TestimonialDetail/TestimonialDetail';
 import './Dashboard.css';
 
 // Dashboard Home Component
@@ -68,6 +70,8 @@ const Dashboard = () => {
         <Routes>
           <Route path="/" element={<DashboardHome />} />
           <Route path="/questions" element={<Questions title="Questions" />} />
+          <Route path="/testimonials" element={<Testimonials title="Testimonials" />} />
+          <Route path="/testimonials/:id" element={<TestimonialDetail title="TestimonialDetail" />} />
           <Route path="/requests" element={<Requests title="Requests" />} />
           <Route path="/settings" element={<EmptyPage title="Settings" />} />
           <Route path="*" element={<EmptyPage title="Page Not Found" />} />

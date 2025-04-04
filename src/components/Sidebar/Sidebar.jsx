@@ -25,7 +25,7 @@ const Sidebar = () => {
     {
       title: 'Testimonials',
       icon: '🎬',
-      path: '/testimonials',
+      path: '/dashboard/testimonials',
     },
     {
       title: 'Requests',
