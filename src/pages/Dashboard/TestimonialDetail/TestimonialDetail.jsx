@@ -7,28 +7,28 @@ import { useAuth } from '../../../context/AuthContext';
 
 const TestimonialDetail = () => {
   const { id } = useParams();
+  const { currentUser } = useAuth();
   const [testimonial, setTestimonial] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [mergeLoading, setMergeLoading] = useState(false);
   const [mergeSuccess, setMergeSuccess] = useState(false);
   const [mergedVideoUrl, setMergedVideoUrl] = useState(null);
-  const { currentUser } = useAuth();
-const token = localStorage.getItem('token');
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
     const fetchTestimonialDetail = async () => {
       setLoading(true);
       try {
-        const testimonialResponse = await api.get(`api/testimonials/request/${id}`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            },
-            params: { 
-                company_id: currentUser.company_id 
-            }
-          });
-        setTestimonial(testimonialResponse.data);
+        const response = await api.get(`api/testimonials/request/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+          params: { company_id: currentUser.company_id }
+        });
+        setTestimonial(response.data);
         setError(null);
       } catch (err) {
         console.error('Error fetching testimonial details:', err);
@@ -43,10 +43,20 @@ const token = localStorage.getItem('token');
     }
   }, [id]);
 
+  const handleConfirmMerge = () => {
+    setShowConfirmation(true);
+  };
+
   const handleMergeVideos = async () => {
+    setShowConfirmation(false);
     setMergeLoading(true);
     try {
-      const response = await api.post(`api/testimonials/${id}/merge`);
+      const response = await api.post(`api/testimonials/${id}/merge`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        params: { company_id: currentUser.company_id }
+      });
       setMergedVideoUrl(response.data.mergedVideoUrl);
       setMergeSuccess(true);
     } catch (err) {
@@ -171,17 +181,17 @@ const token = localStorage.getItem('token');
 
       {testimonial.testimonial_responses.length > 0 && (
         <div className="testimonial-actions">
-          {mergeSuccess ? (
+          {(testimonial.video_url || mergedVideoUrl) ? (
             <div className="merged-video-container">
               <h2>Merged Testimonial Video</h2>
               <div className="merged-video">
                 <video controls className="main-video">
-                  <source src={mergedVideoUrl} type="video/mp4" />
+                  <source src={mergedVideoUrl || testimonial.video_url} type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
               </div>
               <a 
-                href={mergedVideoUrl} 
+                href={mergedVideoUrl || testimonial.video_url} 
                 download="merged_testimonial.mp4"
                 className="download-button"
                 target="_blank"
@@ -194,7 +204,7 @@ const token = localStorage.getItem('token');
           ) : (
             <button 
               className="merge-button"
-              onClick={handleMergeVideos}
+              onClick={handleConfirmMerge}
               disabled={mergeLoading}
             >
               {mergeLoading ? (
@@ -210,6 +220,20 @@ const token = localStorage.getItem('token');
               )}
             </button>
           )}
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {showConfirmation && (
+        <div className="confirmation-modal">
+          <div className="confirmation-content">
+            <h3>Confirm Merge</h3>
+            <p>Are you sure you want to merge all videos into one testimonial?</p>
+            <div className="confirmation-buttons">
+              <button onClick={handleMergeVideos} className="confirm-button">Yes, Merge</button>
+              <button onClick={() => setShowConfirmation(false)} className="cancel-button">Cancel</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
