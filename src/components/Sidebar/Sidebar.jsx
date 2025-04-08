@@ -23,14 +23,14 @@ const Sidebar = () => {
       path: '/dashboard/questions',
     },
     {
-      title: 'Testimonials',
-      icon: '🎬',
-      path: '/dashboard/testimonials',
-    },
-    {
       title: 'Requests',
       icon: '📥', 
       path: '/dashboard/requests',
+    },
+    {
+      title: 'Testimonials',
+      icon: '🎬',
+      path: '/dashboard/testimonials',
     },
     {
       title: 'Settings',
