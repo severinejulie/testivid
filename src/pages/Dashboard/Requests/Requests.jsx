@@ -9,6 +9,7 @@ const Requests = () => {
   const [selectedQuestions, setSelectedQuestions] = useState([]);
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerName, setCustomerName] = useState('');
+  const [customerPosition, setCustomerPosition] = useState('');
   const [expiresDays, setExpiresDays] = useState(30);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -81,6 +82,7 @@ const Requests = () => {
       await api.post('/api/testimonials/request', {
         customer_email: customerEmail,
         customer_name: customerName,
+        customer_position: customerPosition,
         question_ids: selectedQuestions,
         expires_days: expiresDays
       });
@@ -88,6 +90,7 @@ const Requests = () => {
       // Reset form fields
       setCustomerEmail('');
       setCustomerName('');
+      setCustomerPosition('');
       setSelectedQuestions([]);
       setExpiresDays(30);
       
@@ -194,6 +197,18 @@ const Requests = () => {
                 value={customerEmail}
                 onChange={(e) => setCustomerEmail(e.target.value)}
                 placeholder="Enter customer email"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="customerPosition">Customer Position</label>
+              <input
+                type="text"
+                id="customerPosition"
+                value={customerPosition}
+                onChange={(e) => setCustomerPosition(e.target.value)}
+                placeholder="Enter customer position"
                 required
               />
             </div>

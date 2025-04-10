@@ -68,12 +68,13 @@ const Dashboard = () => {
       
       <main className="dashboard-main">
         <Routes>
-          <Route path="/" element={<DashboardHome />} />
-          <Route path="/questions" element={<Questions title="Questions" />} />
-          <Route path="/testimonials" element={<Testimonials title="Testimonials" />} />
-          <Route path="/testimonials/:id" element={<TestimonialDetail title="TestimonialDetail" />} />
-          <Route path="/requests" element={<Requests title="Requests" />} />
-          <Route path="/settings" element={<EmptyPage title="Settings" />} />
+          {/* Key change: All these paths are actually relative to /dashboard/* */}
+          <Route index element={<DashboardHome />} />
+          <Route path="questions" element={<Questions title="Questions" />} />
+          <Route path="testimonials" element={<Testimonials title="Testimonials" />} />
+          <Route path="testimonials/:id" element={<TestimonialDetail title="TestimonialDetail" />} />
+          <Route path="requests" element={<Requests title="Requests" />} />
+          <Route path="settings" element={<EmptyPage title="Settings" />} />
           <Route path="*" element={<EmptyPage title="Page Not Found" />} />
         </Routes>
       </main>

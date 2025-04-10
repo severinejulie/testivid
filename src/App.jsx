@@ -15,18 +15,24 @@ import TestimonialSubmit from './pages/TestimonialSubmit/TestimonialSubmit';
 import './App.css';
 
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, isInGoogleSignupFlow } = useAuth();
+  const { isAuthenticated, isAuthLoading, isInGoogleSignupFlow } = useAuth();
   const location = useLocation();
-  // Redirect to signup if Google flow is incomplete
-  if (isAuthenticated && isInGoogleSignupFlow && 
-      location.pathname === '/dashboard') {
-    return <Navigate to="/signup" state={{ fromGoogle: true, googleStep: 2 }} />;
+
+  // 👇 Wait until session is restored
+  if (isAuthLoading) {
+    return null; // or a loading spinner
   }
-  // Normal protection logic
+
+  // Special case: Google signup flow incomplete
+  if (isAuthenticated && isInGoogleSignupFlow && location.pathname === '/dashboard') {
+    return <Navigate to="/signup" state={{ fromGoogle: true, googleStep: 2 }} replace />;
+  }
+
+  // Normal protection
   if (!isAuthenticated) {
-    return <Navigate to="/signin" />;
+    return <Navigate to="/signin" replace />;
   }
-  
+
   return children;
 };
 
@@ -34,61 +40,60 @@ const SessionInitializer = () => {
   const { 
     setCurrentUser, 
     setIsAuthenticated, 
-    setIsInGoogleSignupFlow
+    setIsInGoogleSignupFlow, 
+    setIsAuthLoading 
   } = useAuth();
+  
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   useEffect(() => {
     const checkSession = async () => {
       const token = localStorage.getItem('token');
       const userData = localStorage.getItem('user');
-      
+
       if (token && userData) {
         try {
-          // Check if we're in the middle of Google signup
           const inGoogleSignup = localStorage.getItem('googleSignupInProgress') === 'true';
-          
-          // Set auth state from localStorage first
+
           setIsAuthenticated(true);
           setCurrentUser(JSON.parse(userData));
-          
-          // Important: Set this state based on localStorage
+
           if (inGoogleSignup) {
             setIsInGoogleSignupFlow(true);
-            
-            // Redirect only if not already on signup page
             if (location.pathname !== '/signup') {
               navigate('/signup', { 
                 state: { 
                   fromGoogle: true, 
                   googleStep: 2 
                 },
-                replace: true // Use replace to avoid building up history
+                replace: true
               });
             }
           } else {
-            // Explicitly set this to false for normal sign-ins
             setIsInGoogleSignupFlow(false);
           }
         } catch (error) {
-          // Token invalid, clean up ALL auth state
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          localStorage.removeItem('googleSignupInProgress');
-          localStorage.removeItem('googleUserData');
-          localStorage.removeItem('googleAccessToken');
-          localStorage.removeItem('googleAuthAction');
+          console.error("Error during session restoration:", error);
+          localStorage.clear();
           setIsAuthenticated(false);
           setCurrentUser(null);
           setIsInGoogleSignupFlow(false);
         }
+      } else {
+        // No token or user, treat as unauthenticated
+        setIsAuthenticated(false);
+        setCurrentUser(null);
+        setIsInGoogleSignupFlow(false);
       }
+      
+      // ✅ Finally mark session restore as done
+      setIsAuthLoading(false);
     };
-    
+
     checkSession();
-  }, [setCurrentUser, setIsAuthenticated, setIsInGoogleSignupFlow, navigate, location.pathname]);
-  
+  }, [setCurrentUser, setIsAuthenticated, setIsInGoogleSignupFlow, setIsAuthLoading, navigate, location.pathname]);
+
   return null;
 };
 

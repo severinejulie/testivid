@@ -44,6 +44,14 @@ const TestimonialSubmit = () => {
         const response = await api.get(`api/public/testimonial/validate/${token}`);
         setTestimonial(response.data.testimonial);
         setQuestions(response.data.questions);
+
+        if (response.data.testimonial.customer_name) {
+          setCustomerName(response.data.testimonial.customer_name)
+        }
+
+        if (response.data.testimonial.customer_position) {
+          setCustomerTitle(response.data.testimonial.customer_position)
+        }
         
         setError(null);
       } catch (err) {
@@ -260,7 +268,7 @@ const handleSubmitAllVideos = async (recordingsToSubmit = null) => {
     });
     
     console.log(`DEBUG: API response received:`, response.data);
-    setFinalVideos(response.data.videoUrls);
+    setFinalVideos(response.data.videos);
     setSuccess(true);
     
   } catch (err) {
@@ -316,11 +324,15 @@ const handleSubmitAllVideos = async (recordingsToSubmit = null) => {
             <div className="final-video-container">
               <h3>Your Testimonial Videos</h3>
               
-              {finalVideos.map((videoUrl, index) => (
-                <video key={index} controls className="final-video">
-                  <source src={videoUrl} type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
+              {finalVideos.map((video, index) => (
+                <div key={index} className="final-video-block">
+                  <h4 className="video-question">{video.question}</h4>
+                  
+                  <video controls className="final-video">
+                    <source src={video.url} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
               ))}
             </div>
           )}

@@ -475,3 +475,13 @@
     font-size: 0.75rem;
   }
 }
+
+.video-question {
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.final-video-block {
+  margin-bottom: 2rem;
+}

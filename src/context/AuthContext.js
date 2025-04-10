@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isInGoogleSignupFlow, setIsInGoogleSignupFlow] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   // Function to safely parse user data from localStorage
   const loadUserFromStorage = () => {
@@ -221,7 +222,9 @@ export const AuthProvider = ({ children }) => {
     setCurrentUser,
     setIsAuthenticated,
     isInGoogleSignupFlow,
-    setIsInGoogleSignupFlow
+    setIsInGoogleSignupFlow,
+    isAuthLoading,
+    setIsAuthLoading
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
