@@ -209,7 +209,6 @@ const Requests = () => {
                 value={customerPosition}
                 onChange={(e) => setCustomerPosition(e.target.value)}
                 placeholder="Enter customer position"
-                required
               />
             </div>
             
@@ -287,7 +286,11 @@ const Requests = () => {
                   {requests.map(request => (
                     <tr key={request.id}>
                       <td>{formatDate(request.created_at)}</td>
-                      <td>{request.customer_email}</td>
+                      <td>
+                      {request.customer_name}
+                        <br></br>
+                        ({request.customer_email})
+                        </td>
                       <td>
                         <span className={`status-badge status-${request.status.toLowerCase()}`}>
                           {request.status}

@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+  faChartBar, 
+  faQuestionCircle, 
+  faInbox, 
+  faVideo, 
+  faCog, 
+  faQuestion 
+} from '@fortawesome/free-solid-svg-icons';
 import './Sidebar.css';
 
 const Sidebar = () => {
@@ -14,32 +23,31 @@ const Sidebar = () => {
   const navItems = [
     {
       title: 'Dashboard',
-      icon: '📊',
+      icon: faChartBar,
       path: '/dashboard',
     },
     {
       title: 'Questions',
-      icon: '❔',
+      icon: faQuestionCircle,
       path: '/dashboard/questions',
     },
     {
       title: 'Requests',
-      icon: '📥', 
+      icon: faInbox,
       path: '/dashboard/requests',
     },
     {
       title: 'Testimonials',
-      icon: '🎬',
+      icon: faVideo,
       path: '/dashboard/testimonials',
     },
     {
       title: 'Settings',
-      icon: '⚙️',
+      icon: faCog,
       path: '/settings',
     },
   ];
 
-  // Check if the current path matches or starts with a nav item path
   const isActive = (path) => {
     return location.pathname === path || 
            (path !== '/dashboard' && location.pathname.startsWith(path));
@@ -58,7 +66,7 @@ const Sidebar = () => {
           {navItems.map((item, index) => (
             <li key={index} className={isActive(item.path) ? 'active' : ''}>
               <Link to={item.path}>
-                <span className="nav-icon">{item.icon}</span>
+                <FontAwesomeIcon icon={item.icon} className="nav-icon" />
                 {!collapsed && <span className="nav-title">{item.title}</span>}
               </Link>
             </li>
@@ -68,7 +76,7 @@ const Sidebar = () => {
       
       <div className="sidebar-footer">
         <div className="help-link">
-          <span className="nav-icon">❓</span>
+          <FontAwesomeIcon icon={faQuestion} className="nav-icon" />
           {!collapsed && <span className="nav-title">Help & Support</span>}
         </div>
       </div>

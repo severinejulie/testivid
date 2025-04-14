@@ -395,6 +395,7 @@ const handleSubmitAllVideos = async (recordingsToSubmit = null) => {
                 <input
                   type="text"
                   id="customerName"
+                  disabled
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
                   placeholder="Enter your full name"
@@ -403,10 +404,11 @@ const handleSubmitAllVideos = async (recordingsToSubmit = null) => {
               </div>
               
               <div className="form-group">
-                <label htmlFor="customerTitle">Your Title/Position (Optional)</label>
+                <label htmlFor="customerTitle">Your Title/Position</label>
                 <input
                   type="text"
                   id="customerTitle"
+                  disabled
                   value={customerTitle}
                   onChange={(e) => setCustomerTitle(e.target.value)}
                   placeholder="e.g. Marketing Director at Company XYZ"

@@ -76,6 +76,7 @@
   
   .sidebar.collapsed .nav-icon {
     margin-right: 0;
+    margin: 0;
   }
   
   .sidebar-footer {

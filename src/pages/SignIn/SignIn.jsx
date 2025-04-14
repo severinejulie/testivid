@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation, useSearchParams  } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import GoogleSignIn from '../../components/GoogleSignIn/GoogleSignIn';
 import './SignIn.css';
@@ -8,6 +8,7 @@ const SignIn = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { signIn, error, isAuthenticated, setError } = useAuth();
+  const [searchParams] = useSearchParams();
   
   const [formData, setFormData] = useState({
     email: '',
@@ -17,6 +18,18 @@ const SignIn = () => {
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState(location.state?.message || '');
+
+  useEffect(() => {
+    const messageParam = searchParams.get('message');
+    if (messageParam) {
+      setMessage(messageParam);
+
+      // Optional: clear the URL after a few seconds so message disappears
+      setTimeout(() => {
+        navigate(location.pathname, { replace: true });
+      }, 5000); // 5 seconds
+    }
+  }, [searchParams, location.pathname, navigate]);
 
   // Redirect if already logged in
   useEffect(() => {
