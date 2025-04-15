@@ -1,10 +1,10 @@
-// Updated TestimonialSubmit.jsx
+// Updated TestimonialSubmit.jsx with 20-second recording limit
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import './TestimonialSubmit.css';
 import Webcam from 'react-webcam';
-import { Camera, Video, RefreshCw, ArrowRight } from 'lucide-react';
+import { Camera, Video, RefreshCw, ArrowRight, Clock } from 'lucide-react';
 
 const TestimonialSubmit = () => {
   const { token } = useParams();
@@ -36,6 +36,10 @@ const TestimonialSubmit = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [videoURL, setVideoURL] = useState('');
   const [bgColor, setBgColor] = useState("#000000");
+  
+  // Timer for 20-second limit
+  const [recordingTimer, setRecordingTimer] = useState(20);
+  const timerIntervalRef = useRef(null);
 
   // Fetch testimonial data
   useEffect(() => {
@@ -82,6 +86,26 @@ const TestimonialSubmit = () => {
     }, 1000);
   };
 
+  // Start recording timer when recording starts
+  const startRecordingTimer = () => {
+    setRecordingTimer(20);
+  
+    // Clear any existing timer first!
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+    }
+  
+    timerIntervalRef.current = setInterval(() => {
+      setRecordingTimer((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(timerIntervalRef.current);
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+  };
+
   // Start recording from webcam
   const handleStartRecording = () => {
     setRecordedChunks([]); // Reset previous recordings
@@ -109,18 +133,26 @@ const TestimonialSubmit = () => {
       setRecordedChunks(localChunks);
       setVideoURL(url);
       setShowPreview(true);
+      
+      // Clear the timer if it's still running
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
     };
   
     mediaRecorderRef.current = recorder;
     recorder.start();
+    
+    // Start the 20-second countdown timer
+    startRecordingTimer();
   
-    // Stop recording after 5 minutes
+    // Set automatic stop after 20 seconds
     setTimeout(() => {
       if (recorder.state === 'recording') {
         recorder.stop();
         setIsRecording(false);
       }
-    }, 5 * 60 * 1000);
+    }, 20 * 1000);
   };
 
   // Stop the recording
@@ -128,63 +160,67 @@ const TestimonialSubmit = () => {
     if (mediaRecorderRef.current?.state === 'recording') {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      
+      // Clear the timer
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
     }
   };
 
   // Accept the recording and move to next question
-  // Accept the recording and move to next question
-const handleAccept = async () => {
-  console.log(`------ DEBUG: handleAccept for question ${currentQuestionIndex + 1}/${questions.length} ------`);
-  console.log(`DEBUG: Current recordings length before adding: ${recordings.length}`);
-  
-  if (recordedChunks.length > 0) {
-    console.log(`DEBUG: Have recorded chunks: ${recordedChunks.length}`);
+  const handleAccept = async () => {
+    console.log(`------ DEBUG: handleAccept for question ${currentQuestionIndex + 1}/${questions.length} ------`);
+    console.log(`DEBUG: Current recordings length before adding: ${recordings.length}`);
     
-    const blob = new Blob(recordedChunks, { type: 'video/webm' });
-    console.log(`DEBUG: Created blob of size: ${blob.size} bytes`);
-    
-    // Add to recordings array
-    const newRecordings = [
-      ...recordings,
-      { 
-        questionId: questions[currentQuestionIndex].id, 
-        blob,
-        bgColor
-      }
-    ];
-    
-    console.log(`DEBUG: New recordings length: ${newRecordings.length}`);
-    console.log(`DEBUG: Question IDs in new recordings: ${newRecordings.map(r => r.questionId).join(', ')}`);
-    
-    // Update recordings state
-    setRecordings(newRecordings);
-    
-    // Reset recording states
-    setShowPreview(false);
-    setVideoURL('');
-    setRecordedChunks([]);
-    
-    // Move to next question or complete
-    if (currentQuestionIndex < questions.length - 1) {
-      console.log(`DEBUG: Moving to next question (${currentQuestionIndex + 2}/${questions.length})`);
-      setCurrentQuestionIndex(prev => prev + 1);
-    } else {
-      console.log(`DEBUG: This was the last question. Moving to complete step.`);
-      // Instead of calling handleSubmitAllVideos directly,
-      // wait for state to update, then move to complete step
-      setStep('complete');
+    if (recordedChunks.length > 0) {
+      console.log(`DEBUG: Have recorded chunks: ${recordedChunks.length}`);
       
-      // Wait for the next render cycle to ensure recordings are updated
-      console.log(`DEBUG: Scheduling submission with ${newRecordings.length} recordings`);
-      setTimeout(() => {
-        console.log(`DEBUG: Inside setTimeout - about to call handleSubmitAllVideos with ${newRecordings.length} recordings`);
-        handleSubmitAllVideos(newRecordings); // Pass the latest recordings directly
-      }, 0);
+      const blob = new Blob(recordedChunks, { type: 'video/webm' });
+      console.log(`DEBUG: Created blob of size: ${blob.size} bytes`);
+      
+      // Add to recordings array
+      const newRecordings = [
+        ...recordings,
+        { 
+          questionId: questions[currentQuestionIndex].id, 
+          blob,
+          bgColor
+        }
+      ];
+      
+      console.log(`DEBUG: New recordings length: ${newRecordings.length}`);
+      console.log(`DEBUG: Question IDs in new recordings: ${newRecordings.map(r => r.questionId).join(', ')}`);
+      
+      // Update recordings state
+      setRecordings(newRecordings);
+      
+      // Reset recording states
+      setShowPreview(false);
+      setVideoURL('');
+      setRecordedChunks([]);
+      
+      // Move to next question or complete
+      if (currentQuestionIndex < questions.length - 1) {
+        console.log(`DEBUG: Moving to next question (${currentQuestionIndex + 2}/${questions.length})`);
+        setCurrentQuestionIndex(prev => prev + 1);
+      } else {
+        console.log(`DEBUG: This was the last question. Moving to complete step.`);
+        // Instead of calling handleSubmitAllVideos directly,
+        // wait for state to update, then move to complete step
+        setStep('complete');
+        
+        // Wait for the next render cycle to ensure recordings are updated
+        console.log(`DEBUG: Scheduling submission with ${newRecordings.length} recordings`);
+        setTimeout(() => {
+          console.log(`DEBUG: Inside setTimeout - about to call handleSubmitAllVideos with ${newRecordings.length} recordings`);
+          handleSubmitAllVideos(newRecordings); // Pass the latest recordings directly
+        }, 0);
+      }
+    } else {
+      console.error(`DEBUG: No recorded chunks available!`);
     }
-  } else {
-    console.error(`DEBUG: No recorded chunks available!`);
-  }
-};
+  };
 
   // Retake the recording
   const handleRetake = () => {
@@ -206,86 +242,91 @@ const handleAccept = async () => {
   };
 
   // Enhanced function with detailed logging
-const handleSubmitAllVideos = async (recordingsToSubmit = null) => {
-  // Use passed recordings or fall back to state
-  const videosToSubmit = recordingsToSubmit || recordings;
-  
-  console.log(`------ DEBUG: Starting submission process ------`);
-  console.log(`DEBUG: Total questions: ${questions.length}`);
-  console.log(`DEBUG: Recordings array length: ${recordings.length}`);
-  console.log(`DEBUG: VideosToSubmit length: ${videosToSubmit.length}`);
-  
-  if (videosToSubmit.length === 0) {
-    console.error('DEBUG: No recordings to submit!');
-    setError('No recordings to submit.');
-    return;
-  }
-  
-  // Debug info for each recording
-  videosToSubmit.forEach((rec, idx) => {
-    console.log(`DEBUG: Recording ${idx + 1} - Question ID: ${rec.questionId}, Has blob: ${!!rec.blob}`);
-  });
-  
-  setIsProcessing(true);
-  
-  try {
-    const formData = new FormData();
+  const handleSubmitAllVideos = async (recordingsToSubmit = null) => {
+    // Use passed recordings or fall back to state
+    const videosToSubmit = recordingsToSubmit || recordings;
     
-    // Log before adding to FormData
-    console.log(`DEBUG: Building FormData with ${videosToSubmit.length} videos`);
+    console.log(`------ DEBUG: Starting submission process ------`);
+    console.log(`DEBUG: Total questions: ${questions.length}`);
+    console.log(`DEBUG: Recordings array length: ${recordings.length}`);
+    console.log(`DEBUG: VideosToSubmit length: ${videosToSubmit.length}`);
     
-    // Append videos with consistent field names
-    videosToSubmit.forEach((recording, index) => {
-      if (!recording.blob) {
-        console.error(`DEBUG: Missing blob for recording ${index}`);
-        return;
-      }
-      
-      // Make sure each file has a unique name
-      const filename = `video${index}.webm`;
-      formData.append("videos", recording.blob, filename);
-      formData.append(`questionIds[${index}]`, recording.questionId);
-      formData.append(`bgColors[${index}]`, recording.bgColor || "#000000");
-      
-      console.log(`DEBUG: Added to FormData - ${filename} with question ID ${recording.questionId}`);
+    if (videosToSubmit.length === 0) {
+      console.error('DEBUG: No recordings to submit!');
+      setError('No recordings to submit.');
+      return;
+    }
+    
+    // Debug info for each recording
+    videosToSubmit.forEach((rec, idx) => {
+      console.log(`DEBUG: Recording ${idx + 1} - Question ID: ${rec.questionId}, Has blob: ${!!rec.blob}`);
     });
     
-    // Other single values
-    formData.append("name", customerName);
-    formData.append("title", customerTitle);
-    formData.append("testimonialId", testimonial.id);
-    formData.append("token", token);
+    setIsProcessing(true);
+    
+    try {
+      const formData = new FormData();
+      
+      // Log before adding to FormData
+      console.log(`DEBUG: Building FormData with ${videosToSubmit.length} videos`);
+      
+      // Append videos with consistent field names
+      videosToSubmit.forEach((recording, index) => {
+        if (!recording.blob) {
+          console.error(`DEBUG: Missing blob for recording ${index}`);
+          return;
+        }
+        
+        // Make sure each file has a unique name
+        const filename = `video${index}.webm`;
+        formData.append("videos", recording.blob, filename);
+        formData.append(`questionIds[${index}]`, recording.questionId);
+        formData.append(`bgColors[${index}]`, recording.bgColor || "#000000");
+        
+        console.log(`DEBUG: Added to FormData - ${filename} with question ID ${recording.questionId}`);
+      });
+      
+      // Other single values
+      formData.append("name", customerName);
+      formData.append("title", customerTitle);
+      formData.append("testimonialId", testimonial.id);
+      formData.append("token", token);
 
-    // Log what's in the FormData (limited info since we can't directly inspect FormData)
-    console.log(`DEBUG: FormData prepared with testimonial ID: ${testimonial.id}`);
-    console.log(`DEBUG: Submitting to API...`);
-    
-    // Set the correct headers for FormData
-    const response = await api.post("api/public/testimonial/save", formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
-    
-    console.log(`DEBUG: API response received:`, response.data);
-    setFinalVideos(response.data.videos);
-    setSuccess(true);
-    
-  } catch (err) {
-    console.error('Error submitting videos:', err);
-    console.error('DEBUG: API error details:', err.response?.data);
-    setError(err.response?.data?.error || 'Failed to submit testimonial videos. Please try again.');
-  } finally {
-    setIsProcessing(false);
-    console.log(`------ DEBUG: Submission process completed ------`);
-  }
-};
+      // Log what's in the FormData (limited info since we can't directly inspect FormData)
+      console.log(`DEBUG: FormData prepared with testimonial ID: ${testimonial.id}`);
+      console.log(`DEBUG: Submitting to API...`);
+      
+      // Set the correct headers for FormData
+      const response = await api.post("api/public/testimonial/save", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      console.log(`DEBUG: API response received:`, response.data);
+      setFinalVideos(response.data.videos);
+      setSuccess(true);
+      
+    } catch (err) {
+      console.error('Error submitting videos:', err);
+      console.error('DEBUG: API error details:', err.response?.data);
+      setError(err.response?.data?.error || 'Failed to submit testimonial videos. Please try again.');
+    } finally {
+      setIsProcessing(false);
+      console.log(`------ DEBUG: Submission process completed ------`);
+    }
+  };
 
   // Clean up video URLs when component unmounts
   useEffect(() => {
     return () => {
       if (videoURL) {
         URL.revokeObjectURL(videoURL);
+      }
+      
+      // Clear any lingering timer
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
       }
     };
   }, [videoURL]);
@@ -403,17 +444,17 @@ const handleSubmitAllVideos = async (recordingsToSubmit = null) => {
                 />
               </div>
               
-              <div className="form-group">
-                <label htmlFor="customerTitle">Your Title/Position</label>
-                <input
-                  type="text"
-                  id="customerTitle"
-                  disabled
-                  value={customerTitle}
-                  onChange={(e) => setCustomerTitle(e.target.value)}
-                  placeholder="e.g. Marketing Director at Company XYZ"
-                />
-              </div>
+              {customerTitle && (
+                <div className="form-group">
+                  <label htmlFor="customerTitle">Your Title/Position</label>
+                  <input
+                    type="text"
+                    id="customerTitle"
+                    disabled
+                    value={customerTitle}
+                  />
+                </div>
+              )}
               
               <div className="questions-preview">
                 <h3>Questions you'll be asked:</h3>
@@ -424,6 +465,12 @@ const handleSubmitAllVideos = async (recordingsToSubmit = null) => {
                     </li>
                   ))}
                 </ul>
+                
+                {/* 20-second limit notification */}
+                <div className="recording-limit-notice">
+                  <Clock size={18} className="notice-icon" />
+                  <p><strong>Note:</strong> Each video response is limited to 20 seconds.</p>
+                </div>
               </div>
               
               <div className="form-actions">
@@ -453,6 +500,17 @@ const handleSubmitAllVideos = async (recordingsToSubmit = null) => {
                   {countdown !== null && (
                     <div className="countdown-overlay">
                       <span className="countdown-number">{countdown}</span>
+                    </div>
+                  )}
+                  
+                  {/* Recording timer overlay */}
+                  {isRecording && (
+                    <div className="recording-timer-overlay">
+                      <div className="recording-indicator">
+                        <div className="recording-pulse"></div>
+                        <span>REC</span>
+                      </div>
+                      <span className="recording-time-remaining">{recordingTimer}s</span>
                     </div>
                   )}
                 </div>

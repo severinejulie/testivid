@@ -485,3 +485,82 @@
 .final-video-block {
   margin-bottom: 2rem;
 }
+
+.recording-limit-notice {
+  display: flex;
+  align-items: center;
+  margin-top: 15px;
+  padding: 10px 15px;
+  background-color: #f8f9fa;
+  border-left: 3px solid #007bff;
+  border-radius: 4px;
+}
+
+.recording-limit-notice .notice-icon {
+  margin-right: 10px;
+  color: #007bff;
+}
+
+.recording-limit-notice p {
+  margin: 0;
+  font-size: 14px;
+  color: #495057;
+}
+
+/* Recording timer overlay */
+.recording-timer-overlay {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 8px 12px;
+  border-radius: 20px;
+  color: white;
+  font-weight: bold;
+}
+
+.recording-indicator {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.recording-pulse {
+  width: 10px;
+  height: 10px;
+  background-color: #ff4b4b;
+  border-radius: 50%;
+  margin-right: 5px;
+  animation: pulse 1.2s infinite;
+}
+
+.recording-time-remaining {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.webcam-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.webcam-video {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+}

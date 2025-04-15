@@ -253,7 +253,8 @@ const TestimonialDetail = () => {
           </div>
         ) : (
           <div className="responses-grid">
-            {testimonial.testimonial_responses.map((response) => (
+            {testimonial.testimonial_responses
+            .map((response) => (
               <div 
                 key={response.id} 
                 className={`response-card ${selectedResponse?.id === response.id ? 'selected' : ''}`}
