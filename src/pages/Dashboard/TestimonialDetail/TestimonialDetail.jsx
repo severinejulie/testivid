@@ -264,15 +264,15 @@ const TestimonialDetail = () => {
                   <p>{response.question?.text || 'Question not available'}</p>
                 </div>
                 
-                {response.video_url ? (
+                {(response.intro_video_url || response.video_url) ? (
                   <div className="response-video">
-                    <video 
-                      controls 
-                      key={`${response.id}-${videoKey}`} // Add key to force video reload
+                    <video
+                      controls
+                      key={`${response.id}-${videoKey}`}
                     >
-                      <source 
-                        src={`${response.video_url}?t=${videoKey}`} // Add cache-busting query parameter
-                        type="video/mp4" 
+                      <source
+                        src={`${(response.intro_video_url || response.video_url)}?t=${videoKey}`}
+                        type="video/mp4"
                       />
                       Your browser does not support the video tag.
                     </video>
@@ -283,6 +283,7 @@ const TestimonialDetail = () => {
                     <p>No video available for this response</p>
                   </div>
                 )}
+
                 
                 {selectedResponse?.id === response.id && response.video_url && (
                   <div className="response-actions">
