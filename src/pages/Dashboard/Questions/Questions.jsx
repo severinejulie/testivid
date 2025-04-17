@@ -3,6 +3,11 @@ import api from '../../../services/api';
 import './Questions.css';
 import { useAuth } from '../../../context/AuthContext';
 import { GripVertical } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+  faTrash,
+  faEdit
+} from '@fortawesome/free-solid-svg-icons';
 import { 
   DndContext, 
   closestCenter,
@@ -56,14 +61,14 @@ const SortableTableRow = ({ question, onEdit, onDelete, isDraggable }) => {
           onClick={() => onEdit(question)}
           aria-label="Edit question"
         >
-          ✏️
+        <FontAwesomeIcon icon={faEdit} className="nav-icon" />
         </button>
         <button 
           className="delete-button" 
           onClick={() => onDelete(question.id)}
           aria-label="Delete question"
         >
-          🗑️
+        <FontAwesomeIcon icon={faTrash} className="nav-icon" />
         </button>
       </td>
     </tr>

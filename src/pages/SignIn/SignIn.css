@@ -160,3 +160,22 @@
     display: inline-block;
     font-size: 0.875rem;
   }
+
+  .remember-me {
+    display: flex;
+    align-items: center;
+  }
+  
+  .remember-me input {
+    margin-right: 0.5rem;
+  }
+
+  .remember-me input {
+    margin-right: 0.5rem;
+    vertical-align: middle;
+  }
+
+  .remember-me label {
+    white-space: nowrap;
+    margin-bottom: 0px;
+  }

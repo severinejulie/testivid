@@ -14,6 +14,7 @@ const Requests = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { currentUser } = useAuth();
+  const [success, setSuccess] = useState(null);
   
   // Modal states
   const [showRequestModal, setShowRequestModal] = useState(false);
@@ -51,6 +52,7 @@ const Requests = () => {
       const response = await api.get(`/api/questions/list?company_id=${currentUser.company_id}&_=${Date.now()}`);
       console.log(response);
       setQuestions(response.data);
+      setSelectedQuestions(response.data.map(q => q.id));
     } catch (err) {
       console.error('Error fetching questions:', err);
       setError('Failed to load questions. Please try again later.');
@@ -98,6 +100,8 @@ const Requests = () => {
       setShowRequestModal(false);
       fetchRequests();
       setError(null);
+      setSuccess('Testimonial request sent successfully!');
+      setTimeout(() => setSuccess(null), 4000);
     } catch (err) {
       console.error('Error sending testimonial request:', err);
       setError('Failed to send testimonial request. Please try again.');
@@ -169,8 +173,6 @@ const Requests = () => {
       <p className="section-description">
         Send testimonial requests to your customers and manage existing requests.
       </p>
-      
-      {error && <div className="error-message">{error}</div>}
       
       <div className="requests-container">
         <section className="request-form-section">
@@ -248,7 +250,8 @@ const Requests = () => {
                 Select one or more questions to include in the testimonial request.
               </p>
             </div>
-            
+            {error && <div className="error-message">{error}</div>}
+            {success && <div className="success-message">{success}</div>}
             <div className="form-actions">
               <button 
                 type="submit" 
@@ -276,7 +279,7 @@ const Requests = () => {
                 <thead>
                   <tr>
                     <th>Date Sent</th>
-                    <th>Customer</th>
+                    <th class="name-column">Customer</th>
                     <th>Status</th>
                     <th>Last Reminder</th>
                     <th className="actions-column">Actions</th>
@@ -284,13 +287,14 @@ const Requests = () => {
                 </thead>
                 <tbody>
                   {requests.map(request => (
-                    <tr key={request.id}>
+                    <tr key={request.id} className="table-row">
                       <td>{formatDate(request.created_at)}</td>
-                      <td>
-                      {request.customer_name}
-                        <br></br>
-                        ({request.customer_email})
-                        </td>
+                      <td class="name-column">
+                        {request.customer_name}
+                        <br />
+                        <span class="email-display">({request.customer_email})</span>
+                        
+                      </td>
                       <td>
                         <span className={`status-badge status-${request.status.toLowerCase()}`}>
                           {request.status}
@@ -298,14 +302,15 @@ const Requests = () => {
                       </td>
                       <td>{formatDate(request.last_reminder_sent)}</td>
                       <td className="actions-cell">
-                        <button 
-                          className="remind-button" 
-                          onClick={() => confirmSendReminder(request.id)}
-                          aria-label="Send reminder"
-                          disabled={request.status === 'COMPLETED'}
-                        >
-                          Send Reminder
-                        </button>
+                        {request.status.toLowerCase() !== 'completed' && (
+                          <button 
+                            className="remind-button" 
+                            onClick={() => confirmSendReminder(request.id)}
+                            aria-label="Send reminder"
+                          >
+                            Send Reminder
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}

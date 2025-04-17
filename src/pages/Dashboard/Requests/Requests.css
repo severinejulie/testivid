@@ -10,7 +10,7 @@
 .requests-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 2rem;
+  gap: 1rem;
 }
 
 @media (max-width: 992px) {
@@ -166,7 +166,7 @@ h2 {
 .requests-table {
   width: 100%;
   border-collapse: collapse;
-  white-space: nowrap;
+  /* white-space: nowrap; */
 }
 
 .requests-table th,
@@ -174,7 +174,10 @@ h2 {
   padding: 0.75rem 1rem;
   text-align: left;
   border-bottom: 1px solid #ddd;
+  vertical-align: top; /* Align content to the top */
+  max-width: 250px; /* Limit cell width */
 }
+
 
 .requests-table th {
   background-color: #f8f9fa;
@@ -189,6 +192,7 @@ h2 {
 
 .actions-cell {
   text-align: center;
+  margin-top:10px;
 }
 
 .remind-button {
@@ -273,4 +277,36 @@ h2 {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
+}
+
+.success-message {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: #d4edda;
+  color: #155724;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.table-row {
+  border-bottom: 1px solid #ddd;
+}
+
+.table-row td {
+  border: none;
+}
+
+.email-display {
+  font-size: 12px;
+  font-style: italic;
+  display: block; /* Change from inline-block to block */
+  white-space: normal; /* Allow wrapping */
+  overflow-wrap: break-word;
+  max-width: 250px; /* Limit the maximum width */
+}
+
+.name-column {
+  max-width: 350px;
+  overflow-wrap: break-word;
+  padding: 10px !important;
 }

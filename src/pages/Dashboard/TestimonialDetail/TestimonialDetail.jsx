@@ -261,7 +261,6 @@ const TestimonialDetail = () => {
                 onClick={() => handleSelectResponse(response)}
               >
                 <div className="response-question">
-                  <h3>Question:</h3>
                   <p>{response.question?.text || 'Question not available'}</p>
                 </div>
                 
